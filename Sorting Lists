@@ -1,0 +1,176 @@
+/*
+ * CSc103 Project 4: Sorting with lists
+ * See readme.html for details.
+ * Please list all references you made use of in order to complete the
+ * assignment: your classmates, websites, etc.  Aside from the lecture notes
+ * and the book, please list everything.  And remember- citing a source does
+ * NOT mean it is okay to COPY THAT SOURCE.  What you submit here **MUST BE
+ * YOUR OWN WORK**.
+ * References:
+ * 
+ *
+ * Finally, please indicate approximately how many hours you spent on this:
+ * #hours: 
+ */
+ 
+ #include <iostream>
+using std:: cin;
+using std::cout;
+using std::endl;
+#include <getopt.h>
+//to parse long arguments.
+#include <string>
+using std::string;
+
+//doubly linked list node:
+struct node {
+  string data;
+  node* prev;
+  node* next;
+  node(string s="", node* p=NULL, node* n=NULL): data(s), prev(p), next(n) {}
+};
+
+void printhead (node*head) {
+  //  Initializing variable, checking condition, Do something 
+  for (; head != NULL; head = head->next)
+      cout << head -> data <<endl;
+}
+
+void printReverse (node *end) {
+  for (; end != NULL; end = end -> prev)
+  cout << end->data << endl;
+}
+
+void printUnique(node *head) {
+    string clone;
+    clone = head->data;
+    cout << clone << endl;
+    while (head) {
+      if (clone != head->data) {
+        cout << head->data << endl;
+        clone = head->data;
+      }
+      head = head->next;
+
+    }
+  }
+
+void printUniqueReverse(node *head) {
+  while (head->next != NULL) {
+    head = head->next;
+  }
+    string clone;
+    clone = head->data;
+    cout << clone << endl;
+    while (head) {
+      if (clone != head->data) {
+        cout << head->data << endl;
+        clone = head->data;
+      }
+      head = head->prev;
+    }
+}
+
+void Sort (node *&head, node *&newNode)  //& means directly changing value 
+{ node *currentNode= head;
+  while (currentNode != NULL) {
+    if (newNode->data <= currentNode->data) {
+      if (currentNode->prev == NULL) {
+        newNode -> next = head;
+        head -> prev = newNode;
+        head = newNode;
+        break;
+      } else {
+        newNode->next = currentNode;
+        newNode->prev = currentNode->prev;
+        currentNode->prev = newNode;
+        newNode->prev->next = newNode;
+        break;
+        }
+    }
+    
+    if (currentNode->next==NULL) {
+      newNode->next = NULL;
+      newNode->prev= currentNode;
+      currentNode->next= newNode;
+      break;
+    } 
+    currentNode = currentNode->next; 
+  }
+}
+
+int main (int argc, char *argv[]) {
+/*define long options*/
+
+static int unique = 0 , reverse=0;
+static struct 
+option long_opts[] =
+{
+  { "unique", no_argument, &unique, 'u' },
+  {"reverse", no_argument,&reverse, 'r'},
+  {0,0,0,0}//this denotes the end of our options.
+
+};
+/* process options*/
+char c;
+int opt_index=0;
+while ((c= getopt_long( argc,argv,"ur", long_opts,&opt_index)) != -1) {
+  switch (c) {
+    case 'u':
+    unique = 1;
+    case 'r':
+    reverse = 1;
+    break;
+    case '?':
+    return 1;
+  }
+}
+
+string s;
+node *newNode, *head;
+getline(cin,s); //first piece youre enterting
+head = new node(s);
+// head->data = s;
+getline(cin,s);
+//newNode->data = s;
+newNode = new node(s);
+
+if (head->data <= newNode->data) {
+  head->next = newNode;
+  newNode->prev = head;
+} else {
+  newNode->next = head;
+  head->prev = newNode;
+  head = newNode;
+}
+
+while (getline(cin,s)) {
+  node *newNode = new node(s);
+  Sort(head, newNode);
+}
+
+// Reverse and Not Unique
+if (reverse && !unique) {
+  node *end = head;
+  while (end->next) {
+    end = end->next;
+  };
+  printReverse(end);
+}
+//Neither
+if (!reverse && !unique) {
+  printhead(head);
+}
+//Unique and Not reverse
+if (unique && !reverse) {
+  printUnique(head);
+}
+// Both
+if (unique && reverse) {
+  printUniqueReverse(head);
+}
+
+
+return 0;
+
+}
