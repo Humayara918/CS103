@@ -1,0 +1,73 @@
+
+/*
+ * CSc103 Project 5: Towers of Hanoi
+ * Please indicate approximately how many hours you spent on this:
+ * #hours:15
+ */
+
+// TODO: write the program.
+#include <iostream>
+using std::cin;
+using std::cout;
+using std::endl;
+#include <getopt.h> // to parse long arguments.
+#include <cstdlib> // for atoi function
+
+/* Here's a skeleton main function for processing the arguments. */
+
+void disks (int, int, int, int);
+void movedisk (int start, int end);
+
+int main(int argc, char *argv[]) {
+	// define long options
+	static struct option long_opts[] = {
+		{"start",        required_argument, 0, 's'},
+		{"end",          required_argument, 0, 'e'},
+		{"num-disks",    required_argument, 0, 'n'},
+		{0,0,0,0} // this denotes the end of our options.
+	};
+	// now process the options:
+	char c; // to hold the option
+	int opt_index = 0;
+	short n=0,start=0,end=0; /* to store inputs to the towers function. */
+	while ((c = getopt_long(argc, argv, "s:e:n:", long_opts, &opt_index)) != -1) {
+		switch (c) {
+			case 's': // process option s
+				start = atoi(optarg);
+				break;
+			case 'e': // process option e
+				end = atoi(optarg);
+				break;
+			case 'n': // process option n
+				n = atoi(optarg);
+				break;
+			case '?': // this will catch unknown options.
+				// here is where you would yell at the user.
+				// although, getopt will already print an error message.
+				return 1;
+		}
+	}
+
+int n3=2;
+cout << "disk ( " << " n: " << n << " start: " << start <<
+ "end: " << end << ' ) ' << endl;
+disks ( n,start, n3, end);
+  //}
+	return 0;
+}
+
+void disks (int n, int start, int aux, int end)
+{
+  if (n==0)
+		return;
+	disks (n-1, start, end, aux);
+	movedisk (start, end);
+	disks (n-1, aux, start, end);
+}
+	void movedisk (int start, int end) {
+		cout << start << "\t" << end << endl;
+	}
+
+
+	/* TODO: now that you have the options and arguments,
+	 * solve the puzzle. */
