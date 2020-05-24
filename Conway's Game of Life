@@ -1,0 +1,199 @@
+  /*
+ * CSc103 Project 3: Game of Life
+ * Please indicate approximately how many hours you spent on this:
+ * #hours:30
+ */
+
+#include <cstdio>
+#include <stdlib.h> // for exit();
+#include <getopt.h> // to parse long arguments.
+#include <unistd.h> // sleep
+#include <vector>
+using std::vector;
+#include <string>
+using std::string;
+#include <iostream>
+using std::cout;
+static const char* usage =
+"Usage: %s [OPTIONS]...\n"
+"Text-based version of Conway's game of life.\n\n"
+"   --seed,-s     FILE     read start state from FILE.\n"
+"   --world,-w    FILE     store current world in FILE.\n"
+"   --fast-fw,-f  NUM      evolve system for NUM generations and quit.\n"
+"   --help,-h              show this message and exit.\n";
+
+size_t max_gen = 0; /* if > 0, fast forward to this generation. */
+string wfilename =  "/tmp/gol-world-current"; /* write state here */
+FILE* fworld = 0; /* handle to file wfilename. */
+string initfilename = "/tmp/gol-world-current"; /* read initial state from here. */
+
+vector<vector<bool> > world;
+void update() {
+vector<vector<size_t> > update;
+
+size_t R1,R2,C1,C2;
+	int neighbors;
+
+for(size_t i = 0; i<world.size(); i++) {
+
+	for(size_t j=0; j<world[i].size(); j++){
+			R1= i-1;
+			R2= i+1;
+			C1= j+1;
+			C2= j-1;
+			neighbors= 0;
+			if (i==0)
+			R1= world.size()-1;
+
+			if (i== world.size()-1)
+			R2=0;
+
+			if (j==0)
+			C2= world[i].size()-1;
+
+
+			if (j== world[i].size()-1)
+			C1=0;
+
+   neighbors = world[R2][C1]+ world[R2][j]+ world[R2][C2]+ world[i][C2]+ world[R1][C2]+ world[R1][j]+ world[R1][C1]+ world[i][C1];
+
+
+	switch (world[i][j]) {
+		case 0:
+
+			if (neighbors==3){
+				update.push_back({i,j});
+			}
+			break;
+		case 1:
+
+			if (neighbors <2 || neighbors > 3) {
+				update.push_back ({i,j});
+			}
+			break;
+		}
+	}
+}
+	for (size_t i=0; i< update.size(); i++) {
+		world[update[i][0]][update[i][1]] = !world[update[i][0]][update[i][1]];
+	}
+}
+
+
+void dumpState(FILE*f) {
+	char c;
+
+	if (wfilename== "-") {
+
+		for (size_t i=0; i<world.size(); i++) {
+
+			for (size_t j=0; j<world[i].size(); j++) {
+				if  (world[i][j]) cout<<"0";
+				else cout << ".";
+				}
+			cout <<"\n";
+			}
+		}
+
+else {
+
+	for (size_t i=0; i< world.size(); i++) {
+
+	for (size_t j=0; j<world[i].size(); j++) {
+			if (world[i][j]) c= 'O';
+			else c= 's.';
+			fwrite(&c,1,1,f);
+		}
+	}
+	rewind(f);
+	fclose(f);
+	}
+
+}
+
+int initFromFile(const string &fworld) {
+	FILE*f= fopen(fworld.c_str(),"rb");
+		if (!f) {
+			printf("Error: cannot open the file");
+			exit(1);
+			return 1;
+		}
+		world.push_back(vector<bool>());
+		size_t rows=0;
+		char c;
+		while (fread(&c, 1, 1,f))
+		{
+			if (c== '\n') {
+				rows++;
+				world.push_back (
+			vector<bool>());
+			}
+			else if (c== '.') {
+				world[rows]. push_back(false);
+			}else { world[rows].push_back(true);
+				}
+			}
+		world.pop_back();
+			fclose(f);
+			return 0;
+		}
+
+
+	void mainLoop() {
+
+	if (max_gen == 0) {
+
+		while (true) {
+			update();
+			dumpState(fworld);
+			sleep(1);
+		}
+	}
+
+	else {
+
+		for (size_t i=0; i<max_gen; i++){
+			update();
+		}
+		dumpState(fworld);
+	}
+}
+
+int main (int argc, char*argv[]) {
+
+	static struct option long_opts[] ={
+		{ "seed", required_argument, 0, 's'}, {"world", required_argument, 0, 'w'}
+, {"fast-fw", required_argument, 0, 'f'},
+	{"help", no_argument, 0, 'h'},
+	{0,0,0,0}
+	};
+
+	char c;
+	int opt_index =0;
+	while ((c= getopt_long(argc, argv, "hs:w:f:", long_opts, &opt_index))!= -1) {
+
+			switch (c) {
+			case 'h':
+			printf(usage,argv[0]);
+			return 0;
+		case 's':
+		initfilename=optarg;
+		break;
+		case 'w':
+		wfilename=optarg;
+		break;
+		case 'f':
+		max_gen = atoi(optarg);
+		break;
+		case '?':
+		printf(usage,argv[0]);
+				return 1;
+				}
+				}
+		initFromFile(initfilename);
+				if (wfilename != "-") {
+		fworld=fopen(wfilename.c_str(),"wb");
+		}
+		mainLoop();
+		return 0;
+	}
