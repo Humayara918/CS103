@@ -1,0 +1,37 @@
+/*
+ * CSc103 Project 2: prime numbers.
+ */
+
+#include <iostream>
+using std::cin;
+using std::cout;
+using std::endl;
+
+int main()
+{
+  unsigned long n;
+  while(cin >> n)
+  {
+  int i = 1;
+  int x = 0;
+  while (i <= n)
+  {
+   if (n%i == 0)
+
+   {
+     x++;
+   }
+    i++;
+   }
+    if (x == 2 )
+    {
+     cout << "1" << endl;
+   }
+   else
+   {
+     cout << "0" << endl;
+   }
+
+  }
+	return 0;
+}
