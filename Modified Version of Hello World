@@ -1,0 +1,23 @@
+/*
+ * CSc103 Project 1: (hello_world++)
+ */
+
+#include <iostream>
+using std::cin;
+using std:: cout;
+#include <string>
+using std:: string;
+
+
+string name;
+string relative;
+int main()
+{
+    cout<< "Enter your name: ";
+    getline(cin, name);
+    cout<< "Enter a relative: ";
+	getline(cin, relative);
+	cout<< "Hello. My name is "<<name << ". You stabbed my " << relative << ". Prepare to die!";
+
+	return 0;
+}
